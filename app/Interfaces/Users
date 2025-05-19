@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Interfaces;
+
+abstract class Users
+{
+    protected string $nom;
+    protected string $prenom;
+    protected string $email;
+    protected string $password;
+    protected string $role;
+
+}
