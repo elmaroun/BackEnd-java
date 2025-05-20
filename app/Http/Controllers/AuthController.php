@@ -10,12 +10,21 @@ use App\Models\TestProfessionnal;
 use App\Models\client;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\Patterns\Builder\ProfessionalBuilder;
+use App\Patterns\Builder\Builders\ServiceBuilder;
+use App\Patterns\Builder\Builders\TransporteurBuilder;
+use App\Patterns\Builder\Builders\ArtisanBuilder;
+
+use Illuminate\Support\Facades\File;
+
+
 
 
 
 
 class AuthController extends Controller
 {
+
 
     
     public function loginProfessional(Request $request)
@@ -82,6 +91,7 @@ class AuthController extends Controller
 
     public function RegisterTransporteur(Request $request)
     {
+       
         $validator = Validator::make($request->all(), [
             'nom' => 'string|max:255',
             'prenom' => 'required|string|max:255',
@@ -90,52 +100,245 @@ class AuthController extends Controller
             'ville' => 'required|string|max:255',
             'adresse' => 'required|string|max:255',
             'domaine' => 'required|string|max:255',
-            'service' => 'required|string|max:255',
-            'motdepasse' => 'required|string|min:8', 
-            'type_vehicule' => 'required|string|max:255',
-            'chargeMax' => 'required|numeric', 
-            'vehicleImage' => 'nullable|image|mimes:jpg,jpeg,png,heic', 
-            'carteRecto' => 'nullable|image|mimes:jpg,jpeg,png,heic',
-            'carteVerso' => 'nullable|image|mimes:jpg,jpeg,png,heic',
-            'patenteFile' => 'nullable|mimes:jpg,jpeg,png,pdf,heic' ,           
+            'motdepasse' => 'required|string|min:8',            
           
         ]);
         
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+        if ($request->input('domaine') == 'transports') {
+    
+            $builder = new TransporteurBuilder();
+            $builder->setName($request->input('nom'));
+            $builder->setPrenom($request->input('prenom'));
+            $builder->setEmail($request->input('email'));
+            $builder->setTelephone($request->input('phone'));
+            $builder->setVille($request->input('ville'));
 
+            $builder->setDomaine(); 
+            $builder->setMotDePasse($request->input('motdepasse'));
+
+            $transporteur= $builder->getProfessional();
+            file_put_contents('builder_state.txt', serialize($builder));
+            session(['builder' => $builder]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Transporteur first step registered successfully!',
+                'data' => $transporteur,
+                
+            ], 201);
+        }elseif($request->input('domaine') == 'travaux'){
+            $builder = new ArtisanBuilder();
+            $builder->setName($request->input('nom'));
+            $builder->setPrenom($request->input('prenom'));
+            $builder->setEmail($request->input('email'));
+            $builder->setTelephone($request->input('phone'));
+            $builder->setVille($request->input('ville'));
+
+            $builder->setDomaine(); 
+            $builder->setMotDePasse($request->input('motdepasse'));
+
+            $artisan= $builder->getProfessional();
+            file_put_contents('builder_state.txt', serialize($builder));
+            session(['builder' => $builder]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Artisan first step registered successfully!',
+                'data' => $artisan,
+                
+            ], 201);
+        }elseif($request->input('domaine') == 'services'){
+            $builder = new ServiceBuilder();
+            $builder->setName($request->input('nom'));
+            $builder->setPrenom($request->input('prenom'));
+            $builder->setEmail($request->input('email'));
+            $builder->setTelephone($request->input('phone'));
+            $builder->setVille($request->input('ville'));
+
+            $builder->setDomaine(); 
+            $builder->setMotDePasse($request->input('motdepasse'));
+
+            $service= $builder->getProfessional();
+            file_put_contents('builder_state.txt', serialize($builder));
+            session(['builder' => $builder]);
+            return response()->json([
+                'success' => true,
+                'message' => 'service first step registered successfully!',
+                'data' => $service,
+                
+            ], 201);
+        }
+    }
+
+   public function RegisterTransporteur2(Request $request)
+    {
+        $serialized = file_get_contents('builder_state.txt');
+        $builder = unserialize($serialized);
+        $professional1 = $builder->getProfessional();
+
+        if (!$builder) {
+             return response()->json([
+            'success' => false,
+            'message' => 'not working',
+            'data' => $professional1,
+
+            ], 201);
+        }
+        $validator = Validator::make($request->all(), [
+            'carte_identite_recto' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+            'carte_identite_verso' => 'required|file|mimes:jpg,jpeg,png,pdf',
+            'is_patent' => 'required|boolean',
+            'img_patent' => 'required_if:is_patent,1|file|mimes:jpg,jpeg,png,pdf',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+        $domaine = $professional1->domaine;
+        if ($domaine == "transports" ) {
+            $builder->setIsPatent($request->input('is_patent'));
+            if ($request->hasFile('carte_identite_recto')) {
+                $path = $request->file('carte_identite_recto')->store('carte_identite_recto');
+                $builder->setCarteIdentiteRecto($path);
+            }
+            if ($request->hasFile('img_patent')) {
+                $path = $request->file('img_patent')->store('img_patent');
+                $builder->setImagePatent($path);
+            }
+            
+            if ($request->hasFile('carte_identite_verso')) {
+                $path = $request->file('carte_identite_verso')->store('carte_identite_verso');
+                $builder->setCarteIdentiteVerso($path);
+            }
+
+            file_put_contents('builder_state.txt', serialize($builder));
+            $professional1 = $builder->getProfessional();
+            return response()->json([
+                'success' => true,
+                'message' => 'Transporteur registered2 successfully!',
+                'results' => 'transports',
+                'data' => $professional1
+            ], 201);
+
+        }elseif($domaine == 'travaux'){
+
+            $builder->setIsPatent($request->input('is_patent'));
+            if ($request->hasFile('carte_identite_recto')) {
+                $path = $request->file('carte_identite_recto')->store('carte_identite_recto');
+                $builder->setCarteIdentiteRecto($path);
+            }
+            if ($request->hasFile('img_patent')) {
+                $path = $request->file('img_patent')->store('img_patent');
+                $builder->setImagePatent($path);
+            }
+            
+            if ($request->hasFile('carte_identite_verso')) {
+                $path = $request->file('carte_identite_verso')->store('carte_identite_verso');
+                $builder->setCarteIdentiteVerso($path);
+            }
+
+            file_put_contents('builder_state.txt', serialize($builder));
+            $professional = $builder->getProfessional();
+            return response()->json([
+                'success' => true,
+                'message' => 'Transporteur registered2 successfully!',
+                'results' => 'travaux',
+                'data' => $professional
+            ], 201);
+
+        }elseif($professional1->domaine == 'services'){
+            $builder->setIsPatent($request->input('is_patent'));
+            if ($request->hasFile('carte_identite_recto')) {
+                $path = $request->file('carte_identite_recto')->store('carte_identite_recto');
+                $builder->setCarteIdentiteRecto($path);
+            }
+            if ($request->hasFile('img_patent')) {
+                $path = $request->file('img_patent')->store('img_patent');
+                $builder->setImagePatent($path);
+            }
+            if ($request->hasFile('carte_identite_verso')) {
+                $path = $request->file('carte_identite_verso')->store('carte_identite_verso');
+                $builder->setCarteIdentiteVerso($path);
+            }
+
+            file_put_contents('builder_state.txt', serialize($builder));
+            $professional = $builder->getProfessional();
+            return response()->json([
+                'success' => true,
+                'message' => 'Transporteur registered2 successfully!',
+                'results' => 'services',
+                'data' => $professional
+            ], 201);
+
+        }
+
+
+    }
+
+
+    public function RegisterTransporteur3(Request $request)
+    {
+        $serialized = file_get_contents('builder_state.txt');
+        $builder = unserialize($serialized);
+
+        if (!$builder) {
+             return response()->json([
+            'success' => false,
+            'message' => 'not working',
+            'data' => $builder,
+
+            ], 201);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'image_vehicule' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+            'charge_max' => 'required|string',
+            'type_vehicule' => 'required|string',
+            'acceptConditions' => 'required|boolean',
+        ]);
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
 
-        $professional = TestProfessionnal::create([
-            'nom' => $request->nom,
-            'prenom' => $request->prenom,
-            'telephone' => $request->phone,
-            'ville' => $request->ville,
-            'adresse' => $request->adresse,
-            'domaine' => $request->domaine,
-            'service' => $request->service,
-            'email' => $request->email,
-            'motdepasse' => Hash::make($request->motdepasse),
-            'carte_identite_recto' => $this-> uploadImageCIN($request->carteRecto),
-            'carte_identite_verso' => $this-> uploadImageCIN($request->carteVerso),
-            'image_patent' => $this->uploadImagePatente($request->patenteFile),
-            'is_patent'
-            
-        ]);
-        
-        $transporteur = Transporteur::create([
-            'professionnal_id' => $professional->id, 
-            'charge_max' => $request->chargeMax,
-            'type_vehicule' => $request->type_vehicule,
-            'image_vehicule' => $this->uploadImageVehicule($request->vehicleImage),
-        ]);
+        $builder->setChargeMax($request->input('charge_max'));
+        $builder->setTypeVehicule($request->input('type_vehicule'));
 
-        // Return response
+        if ($request->hasFile('image_vehicule')) {
+            $path = $request->file('image_vehicule')->store('image_vehicule');
+            $builder->setImageVehicule($path);
+        
+        }
+        file_put_contents('builder_state.txt', serialize($builder));
+        $transporteur = $builder->getProfessional();
+        $professional = TestProfessionnal::create([
+            'nom' => $transporteur->nom,
+            'prenom' => $transporteur->prenom,
+            'telephone' => $transporteur->telephone,
+            'email' => $transporteur->email,
+            'ville' => $transporteur->ville,
+            'location' => $transporteur->location,
+            'domaine' => $transporteur->domaine,
+            'services' => $transporteur->services,
+            'motdepasse' => $transporteur->motdepasse,
+            'carte_identite_recto' => $transporteur->carte_identite_recto,
+            'carte_identite_verso' => $transporteur->carte_identite_verso,
+            'image_patent' => $transporteur->image_patent,
+            'is_patent' => $transporteur->is_patent,
+        ]);
+        $Transporteur = Transporteur::create([
+            'professionnal_id' => $professional->id,
+            'image_vehicule' => $transporteur->image_vehicule,
+            'charge_max' => $transporteur->prenom,
+            'type_vehicule' => $transporteur->telephone,
+           
+        ]);
         return response()->json([
             'success' => true,
-            'message' => 'Professional registered successfully!',
-            'data' => $professional], 201);
+            'message' => 'Transporteur registered2 successfully!',
+            'data' => $professional
+        ], 201);
     }
+
     public function registerClient(Request $request)
     {
 
@@ -158,33 +361,33 @@ class AuthController extends Controller
             'data' => $professional], 201);
     }
     public function uploadImageVehicule($image)
-{
-    if ($image) {
-        $imageName = time() . '_' . $image->getClientOriginalName();
-        $image->move(public_path('uploads/ImageVehicule'), $imageName);
-        return 'uploads/ImageVehicule/' . $imageName;
+    {
+        if ($image) {
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('uploads/ImageVehicule'), $imageName);
+            return 'uploads/ImageVehicule/' . $imageName;
+        }
+        return null;
     }
-    return null;
-}
-public function uploadImagePatente($image)
-{
-    if ($image) {
-        $imageName = time() . '_' . $image->getClientOriginalName();
-        $image->move(public_path('uploads/ImagePatente'), $imageName);
-        return 'uploads/ImagePatent/' . $imageName;
+    public function uploadImagePatente($image)
+    {
+        if ($image) {
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('uploads/ImagePatente'), $imageName);
+            return 'uploads/ImagePatent/' . $imageName;
+        }
+        return null;
     }
-    return null;
-}
 
-public function uploadImageCIN($image)
-{
-    if ($image) {
-        $imageName = time() . '_' . $image->getClientOriginalName();
-        $image->move(public_path('uploads/ImageCIN'), $imageName);
-        return 'uploads/ImageCIN/' . $imageName;
+    public function uploadImageCIN($image)
+    {
+        if ($image) {
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('uploads/ImageCIN'), $imageName);
+            return 'uploads/ImageCIN/' . $imageName;
+        }
+        return null;
     }
-    return null;
-}
 
 
     public function authenticate(Request $request)

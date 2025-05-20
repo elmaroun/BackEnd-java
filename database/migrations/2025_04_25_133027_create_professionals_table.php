@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('prenom');
             $table->string('telephone');
             $table->string('ville');
-            $table->string('adresse');
+            $table->string('location');
             $table->string('domaine');
-            $table->string('service');
+            $table->string('services');
             $table->string('email')->unique();
             $table->string('motdepasse');
             $table->string('carte_identite_recto')->nullable();

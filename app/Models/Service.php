@@ -5,7 +5,7 @@ use App\Interfaces\Professional;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Service extends Model
+class Service extends professionnal
 {
     protected $fillable = [
         'services_offerts',

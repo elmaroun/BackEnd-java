@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Professionnal; // Correction ici
 
-class Transporteur extends Model{
-
+class Transporteur extends professionnal
+{
     protected $fillable = [
         'professionnal_id',
         'image_vehicule',

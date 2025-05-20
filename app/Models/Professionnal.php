@@ -2,9 +2,14 @@
 
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
+
 
 abstract class Professionnal extends Model
 {
+    use HasApiTokens;
+
     protected $fillable = [
         'nom',
         'prenom',
