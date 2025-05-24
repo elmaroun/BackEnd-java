@@ -1,6 +1,9 @@
 <?php
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfController;
+use App\Http\Controllers\AvisProfController;
+
 
 
 Route::post('/login', [AuthController::class, 'loginProfessional'])->name('login.post');
@@ -12,12 +15,15 @@ Route::post('/RegisterTransporteur', [AuthController::class, 'RegisterTransporte
 Route::post('/RegisterTransporteur2', [AuthController::class, 'RegisterTransporteur2'])->name('Register.Transporteur2');
 Route::post('/RegisterTransporteur3', [AuthController::class, 'RegisterTransporteur3'])->name('Register.Transporteur3');
 
+Route::get('/Dashboard', [ProfController::class, 'Dashboard'])->name('Prof.Dashboard');
 
-Route::get('/set-session', function () {
-    session(['user_id' => 999]);
-    return response()->json(['message' => 'Session set']);
-});
+Route::get('/AvisRecus', [ProfController::class, 'AvisRecus'])->name('Prof.AvisRecus');
 
-Route::get('/get-session', function () {
-    return response()->json(['session' => session()->all()]);
-});
+
+Route::get('/demandes/{id}', [ProfController::class, 'show']);
+Route::put('/demandes/{id}/accept', [ProfController::class, 'accept']);
+Route::put('/demandes/{id}/refuse', [ProfController::class, 'refuse']);
+
+Route::get('/Profile', [ProfController::class, 'GetProfile'])->name('Profile');
+Route::post('/update-profile', [ProfController::class, 'UpdateProfile'])->name('Update-Profile');
+Route::get('professionals/avis', [AvisProfController::class, 'GetAvisProfessionnal'])->name('professionals.avis');

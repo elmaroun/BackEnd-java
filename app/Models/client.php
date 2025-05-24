@@ -13,6 +13,7 @@ class client extends Model  implements  Authenticatable
     use AuthenticatableTrait;
 
     protected $fillable = [
+        'img',
         'nom',
         'prenom',
         'telephone',

@@ -11,5 +11,6 @@ class TestProfessionnal extends Professionnal implements Authenticatable
 {
     use AuthenticatableTrait;
     protected $table = 'professionnals';
+
     
 }

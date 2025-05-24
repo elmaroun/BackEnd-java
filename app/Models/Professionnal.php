@@ -4,6 +4,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Travaux;
 
 
 abstract class Professionnal extends Model
@@ -11,6 +12,7 @@ abstract class Professionnal extends Model
     use HasApiTokens;
 
     protected $fillable = [
+        'img',
         'nom',
         'prenom',
         'telephone',
@@ -49,4 +51,5 @@ abstract class Professionnal extends Model
     {
         return $this->hasOne(Transporteur::class);
     }
+
 }

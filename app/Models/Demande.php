@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Demande extends Model
 {
     protected $fillable = [
-        'client_id',
+        'user_id',
         'professional_id',
-        'adresse',
+        'location',
         'description',
         'date',
         'statut',

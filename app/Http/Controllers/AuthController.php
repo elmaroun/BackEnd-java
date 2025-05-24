@@ -8,14 +8,17 @@ use App\Models\Professionnal;
 use App\Models\Transporteur;
 use App\Models\TestProfessionnal;
 use App\Models\client;
+use App\Models\Travaux;
+
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Patterns\Builder\ProfessionalBuilder;
 use App\Patterns\Builder\Builders\ServiceBuilder;
 use App\Patterns\Builder\Builders\TransporteurBuilder;
 use App\Patterns\Builder\Builders\ArtisanBuilder;
-
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+
 
 
 
@@ -26,7 +29,6 @@ class AuthController extends Controller
 {
 
 
-    
     public function loginProfessional(Request $request)
     {
         $credentials = $request->validate([
@@ -38,6 +40,21 @@ class AuthController extends Controller
 
         if ($professional && Hash::check($credentials['password'], $professional->motdepasse)) {
             Auth::login($professional);
+
+            $userData = [
+            'id' => Auth::id(),
+            'nom' => Auth::user()->nom,
+            'prenom' => Auth::user()->prenom,
+            'email' => Auth::user()->email,
+            'telephone' => Auth::user()->telephone,
+            'ville' => Auth::user()->ville,
+            'location' => Auth::user()->location,
+            'domaine' => Auth::user()->domaine,
+            'services' => Auth::user()->services,
+            'logged_in_at' => now()->toDateTimeString(),
+            ];
+            Storage::put('user_logins.json', json_encode($userData, JSON_PRETTY_PRINT));
+
             return response()->json([
                 'success' => true,
                 'message' => 'Successfully authenticated',
@@ -77,7 +94,7 @@ class AuthController extends Controller
         }else{
             return response()->json([
                 'success' => false,
-                'message' => 'password incorrect#',
+                'message' => 'password incorrect',
                 
             ]);
 
@@ -124,7 +141,7 @@ class AuthController extends Controller
             session(['builder' => $builder]);
             return response()->json([
                 'success' => true,
-                'message' => 'Transporteur first step registered successfully!',
+                'message' => 'Étape 1 terminée avec succès.',
                 'data' => $transporteur,
                 
             ], 201);
@@ -144,7 +161,7 @@ class AuthController extends Controller
             session(['builder' => $builder]);
             return response()->json([
                 'success' => true,
-                'message' => 'Artisan first step registered successfully!',
+                'message' => 'Étape 1 terminée avec succès.',
                 'data' => $artisan,
                 
             ], 201);
@@ -164,7 +181,7 @@ class AuthController extends Controller
             session(['builder' => $builder]);
             return response()->json([
                 'success' => true,
-                'message' => 'service first step registered successfully!',
+                'message' => 'Étape 1 terminée avec succès.',
                 'data' => $service,
                 
             ], 201);
@@ -215,7 +232,7 @@ class AuthController extends Controller
             $professional1 = $builder->getProfessional();
             return response()->json([
                 'success' => true,
-                'message' => 'Transporteur registered2 successfully!',
+                'message' => 'Étape 2 terminée avec succès.',
                 'results' => 'transports',
                 'data' => $professional1
             ], 201);
@@ -241,7 +258,7 @@ class AuthController extends Controller
             $professional = $builder->getProfessional();
             return response()->json([
                 'success' => true,
-                'message' => 'Transporteur registered2 successfully!',
+                'message' => 'Étape 2 terminée avec succès.',
                 'results' => 'travaux',
                 'data' => $professional
             ], 201);
@@ -265,7 +282,7 @@ class AuthController extends Controller
             $professional = $builder->getProfessional();
             return response()->json([
                 'success' => true,
-                'message' => 'Transporteur registered2 successfully!',
+                'message' => 'Étape 2 terminée avec succès.',
                 'results' => 'services',
                 'data' => $professional
             ], 201);
@@ -280,6 +297,9 @@ class AuthController extends Controller
     {
         $serialized = file_get_contents('builder_state.txt');
         $builder = unserialize($serialized);
+        $professional = $builder->getProfessional();
+        $domaine = $professional->domaine;
+
 
         if (!$builder) {
              return response()->json([
@@ -290,53 +310,146 @@ class AuthController extends Controller
             ], 201);
         }
 
-        $validator = Validator::make($request->all(), [
-            'image_vehicule' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
-            'charge_max' => 'required|string',
-            'type_vehicule' => 'required|string',
-            'acceptConditions' => 'required|boolean',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
-        }
 
-        $builder->setChargeMax($request->input('charge_max'));
-        $builder->setTypeVehicule($request->input('type_vehicule'));
+        if ($domaine == "transports") {
 
-        if ($request->hasFile('image_vehicule')) {
-            $path = $request->file('image_vehicule')->store('image_vehicule');
-            $builder->setImageVehicule($path);
-        
+            $validator = Validator::make($request->all(), [
+                'image_vehicule' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+                'charge_max' => 'required|string',
+                'type_vehicule' => 'required|string',
+                'acceptConditions' => 'required|boolean',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 400);
+            }
+
+            $builder->setChargeMax($request->input('charge_max'));
+            $builder->setTypeVehicule($request->input('type_vehicule'));
+
+            if ($request->hasFile('image_vehicule')) {
+                $path = $request->file('image_vehicule')->store('image_vehicule');
+                $builder->setImageVehicule($path);
+            }
+            file_put_contents('builder_state.txt', serialize($builder));
+            $transporteur = $builder->getProfessional();
+            $professional = TestProfessionnal::create([
+                'nom' => $transporteur->nom,
+                'prenom' => $transporteur->prenom,
+                'telephone' => $transporteur->telephone,
+                'email' => $transporteur->email,
+                'ville' => $transporteur->ville,
+                'location' => $transporteur->location,
+                'domaine' => $transporteur->domaine,
+                'services' => $transporteur->services,
+                'motdepasse' => $transporteur->motdepasse,
+                'carte_identite_recto' => $transporteur->carte_identite_recto,
+                'carte_identite_verso' => $transporteur->carte_identite_verso,
+                'image_patent' => $transporteur->image_patent,
+                'is_patent' => $transporteur->is_patent,
+            ]);
+            $Transporteur = Transporteur::create([
+                'professionnal_id' => $professional->id,
+                'image_vehicule' => $transporteur->image_vehicule,
+                'charge_max' => $transporteur->charge_max,
+                'type_vehicule' => $transporteur->telephone,
+            
+            ]);
+            return response()->json([
+                'success' => true,
+                'message' => "Votre compte a été créé avec succès.",
+                'data' => $professional
+            ], 201);
+        }elseif($domaine == 'travaux'){
+
+            $validator = Validator::make($request->all(), [
+                'services' => 'nullable|array|max:4',
+                'services.*' => 'string|max:255',
+                'serviceImages' => 'nullable|array|max:4',
+                'serviceImages.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 400);
+            }
+            $artisan = $builder->getProfessional();
+            $professional = TestProfessionnal::create([
+                'nom' => $artisan->nom,
+                'prenom' => $artisan->prenom,
+                'telephone' => $artisan->telephone,
+                'email' => $artisan->email,
+                'ville' => $artisan->ville,
+                'location' => $artisan->location,
+                'domaine' => $artisan->domaine,
+                'services' => $artisan->services,
+                'motdepasse' => $artisan->motdepasse,
+                'carte_identite_recto' => $artisan->carte_identite_recto,
+                'carte_identite_verso' => $artisan->carte_identite_verso,
+                'image_patent' => $artisan->image_patent,
+                'is_patent' => $artisan->is_patent,
+            ]);
+            if ($request->has('services')) {
+                foreach ($request->services as $serviceName) {
+                    Travaux::create([
+                        'professionnal_id' => $professional->id,
+                        'description' => $serviceName,
+                        'type' => 'name'
+
+                    ]);
+                }
+            }
+            if ($request->hasFile('serviceImages')) {
+                foreach ($request->file('serviceImages') as $image) {
+                    $path = $image->store('uploads/services', 'public');
+                    Travaux::create([
+                        'professionnal_id' => $professional->id,
+                        'description' => $path,
+                        'type' => 'image'
+
+                    ]);
+                }
+            }
+
+            
+            file_put_contents('builder_state.txt', serialize($builder));
+            $professional = $builder->getProfessional();
+            return response()->json([
+                'success' => true,
+                'message' => "Votre compte a été créé avec succès.",
+                'results' => 'travaux',
+                'data' => $professional
+            ], 201);
+
+        }elseif($domaine == 'services'){
+
+            $service = $builder->getProfessional();
+            $professional = TestProfessionnal::create([
+                'nom' => $artisan->nom,
+                'prenom' => $artisan->prenom,
+                'telephone' => $artisan->telephone,
+                'email' => $artisan->email,
+                'ville' => $artisan->ville,
+                'location' => $artisan->location,
+                'domaine' => $artisan->domaine,
+                'services' => $artisan->services,
+                'motdepasse' => $artisan->motdepasse,
+                'carte_identite_recto' => $artisan->carte_identite_recto,
+                'carte_identite_verso' => $artisan->carte_identite_verso,
+                'image_patent' => $artisan->image_patent,
+                'is_patent' => $artisan->is_patent,
+            ]);
+    
+            
+
+            
+            file_put_contents('builder_state.txt', serialize($builder));
+            $professional = $builder->getProfessional();
+            return response()->json([
+                'success' => true,
+                'message' => "Votre compte a été créé avec succès.",
+                'results' => 'travaux',
+                'data' => $professional
+            ], 201);
+
         }
-        file_put_contents('builder_state.txt', serialize($builder));
-        $transporteur = $builder->getProfessional();
-        $professional = TestProfessionnal::create([
-            'nom' => $transporteur->nom,
-            'prenom' => $transporteur->prenom,
-            'telephone' => $transporteur->telephone,
-            'email' => $transporteur->email,
-            'ville' => $transporteur->ville,
-            'location' => $transporteur->location,
-            'domaine' => $transporteur->domaine,
-            'services' => $transporteur->services,
-            'motdepasse' => $transporteur->motdepasse,
-            'carte_identite_recto' => $transporteur->carte_identite_recto,
-            'carte_identite_verso' => $transporteur->carte_identite_verso,
-            'image_patent' => $transporteur->image_patent,
-            'is_patent' => $transporteur->is_patent,
-        ]);
-        $Transporteur = Transporteur::create([
-            'professionnal_id' => $professional->id,
-            'image_vehicule' => $transporteur->image_vehicule,
-            'charge_max' => $transporteur->prenom,
-            'type_vehicule' => $transporteur->telephone,
-           
-        ]);
-        return response()->json([
-            'success' => true,
-            'message' => 'Transporteur registered2 successfully!',
-            'data' => $professional
-        ], 201);
     }
 
     public function registerClient(Request $request)

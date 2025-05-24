@@ -14,13 +14,14 @@ return new class extends Migration
     {
         Schema::create('professionnals', function (Blueprint $table) {
             $table->id();
+            $table->string('img')->nullable();
             $table->string('nom');
             $table->string('prenom');
             $table->string('telephone');
             $table->string('ville');
-            $table->string('location');
-            $table->string('domaine');
-            $table->string('services');
+            $table->string('location')->nullable();
+            $table->enum('domaine', ['transports', 'travaux','services']); 
+            $table->string('services')->nullable();
             $table->string('email')->unique();
             $table->string('motdepasse');
             $table->string('carte_identite_recto')->nullable();
