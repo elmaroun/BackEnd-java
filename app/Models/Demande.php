@@ -9,7 +9,7 @@ class Demande extends Model
     protected $fillable = [
         'client_id',
         'latitude',
-        'longtitude',
+        'longitude',
         'professional_id',
         'location',
         'description',

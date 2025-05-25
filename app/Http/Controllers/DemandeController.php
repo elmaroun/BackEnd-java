@@ -61,6 +61,8 @@ class DemandeController extends Controller
             'client_id' => 2,
             'date' => $request->desired_date,
             'location' => $request->address,
+            'latitude' =>$request->latitude,
+            'longitude' =>$request->longitude,
             'statut' => 'En cours',
 
         ]);
@@ -71,8 +73,49 @@ class DemandeController extends Controller
                 'message' => 'Successfully added demande',
             ]);
     }
+    public function AddDemandeProf(Request $request)
+    {
+        $credentials = $request->validate([
+            'professional_id' => 'required',
+            'demande_id' => 'required',
+        ]);
 
-        public function AddDemandeToDB(Request $request)
+        // Check if this professional already has this demande
+        $existingDemande = Demande::where([
+            'id' => $request->demande_id
+        ])->first();
+
+        if ($existingDemande->professionnal_id ==null) {
+            // Update existing demande
+            $existingDemande->update([
+                'professionnal_id' => $request->professional_id,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'action' => 'updated',
+                'idDemande' => $existingDemande->id,
+                'message' => 'Existing demande updated successfully',
+            ]);
+        }
+
+        $newDemandeData = $existingDemande->toArray();
+        $newDemandeData['professionnal_id'] = $request->professional_id;
+
+        // Optionally unset fields you don't want to copy (like id, timestamps)
+        unset($newDemandeData['id'], $newDemandeData['created_at'], $newDemandeData['updated_at']);
+
+        $demande = Demande::create($newDemandeData);
+
+        return response()->json([
+            'success' => true,
+            'action' => 'created',
+            'idDemande' => $demande->id,
+            'message' => 'New demande created successfully',
+        ]);
+    }
+
+    public function AddDemandeToDB(Request $request)
     {
         $credentials = $request->validate([
             'demande_type' => 'required',
@@ -99,15 +142,34 @@ class DemandeController extends Controller
         $demande = Demande::findOrFail($demandeId);
         
         // Get professionals within 10km radius (adjust as needed)
-        $professionals = TestProfessionnal::select('professionnals.*')
-            ->selectRaw('(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance', [
+    $professionals = TestProfessionnal::select('professionnals.*')
+        ->selectRaw('
+            (6371 * acos(
+                cos(radians(?)) * cos(radians(latitude)) * 
+                cos(radians(longitude) - radians(?)) + 
+                sin(radians(?)) * sin(radians(latitude))
+            )) AS distance', [
                 $demande->latitude,
                 $demande->longitude,
                 $demande->latitude
             ])
-            ->having('distance', '<', 10) 
-            ->orderBy('distance')
-            ->get();
+        ->selectRaw("
+            CONCAT_WS(', ',
+                TRIM(SUBSTRING_INDEX(location, ',', 1)),
+                TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(location, ',', 2), ',', -1)),
+                TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(location, ',', 3), ',', -1))
+            ) AS formatted_address
+        ")
+        ->withAvg('avis', 'rating')
+        ->withCount(['demandes as requests_count' => function($query) {
+            $query->where('statut', 'Done');
+        }]) // assuming 'note' is the rating column
+        ->having('distance', '<', 10)
+        ->orderBy('distance')
+        ->get();
+
+
+
 
         return response()->json([
             'success' => true,

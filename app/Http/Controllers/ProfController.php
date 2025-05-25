@@ -213,11 +213,28 @@ class ProfController extends Controller
         }
 
 
+public function getProfileProf($profId)
+{
+    $user = TestProfessionnal::where('id', $profId)
+        ->select('*')
+        ->selectRaw("
+            CONCAT_WS(', ',
+                TRIM(SUBSTRING_INDEX(location, ',', 1)),
+                TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(location, ',', 2), ',', -1)),
+                TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(location, ',', 3), ',', -1))
+            ) AS formatted_address
+        ")
+        ->withAvg('avis', 'rating')
+        ->withCount(['demandes as requests_count' => function($query) {
+            $query->where('statut', 'Done');
+        }])
+        ->firstOrFail();
 
-
-
-
-    
+    return response()->json([
+        'success' => true,
+        'user' => $user,
+    ]);
+}
 
     
 }

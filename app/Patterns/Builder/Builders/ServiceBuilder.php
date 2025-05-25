@@ -24,6 +24,12 @@ class ServiceBuilder implements ProfessionalBuilder {
         $this->service->email = $email;
     }
 
+    public function setLatitude($latitude) {
+        $this->service->latitude = $latitude;
+    } 
+    public function setLongitude($longitude) {
+        $this->service->longitude = $longitude;
+    }
     public function setTelephone($telephone) {
         $this->service->telephone = $telephone;
     }

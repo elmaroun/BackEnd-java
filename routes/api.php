@@ -30,3 +30,5 @@ Route::post('/update-profile', [ProfController::class, 'UpdateProfile'])->name('
 Route::get('professionals/avis', [AvisProfController::class, 'GetAvisProfessionnal'])->name('professionals.avis');
 Route::post('/service-request', [DemandeController::class, 'AddDemande'])->name('Demande.Add');
 Route::get('/professionals/nearby/{demandeId}', [DemandeController::class, 'getNearby']);
+Route::post('/addDemandeProf', [DemandeController::class, 'AddDemandeProf'])->name('Demande.Add.Prof');
+Route::get('/profileProf/{profId}', [ProfController::class, 'getProfileProf'])->name('prof.prof');

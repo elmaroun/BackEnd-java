@@ -34,6 +34,12 @@ class TransporteurBuilder implements ProfessionalBuilder {
     public function setLocation($adresse) {
         $this->transporteur->location = $adresse;
     }
+    public function setLatitude($latitude) {
+        $this->transporteur->latitude = $latitude;
+    } 
+    public function setLongitude($longitude) {
+        $this->transporteur->longitude = $longitude;
+    }
 
     public function setDomaine() {
         $this->transporteur->domaine = 'transports'; // Fixed for this type

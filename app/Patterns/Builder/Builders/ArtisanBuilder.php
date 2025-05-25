@@ -19,6 +19,12 @@ class ArtisanBuilder implements ProfessionalBuilder {
     public function setPrenom($prenom) {
         $this->artisan->prenom = $prenom;
     }
+    public function setLatitude($latitude) {
+        $this->artisan->latitude = $latitude;
+    } 
+    public function setLongitude($longitude) {
+        $this->artisan->longitude = $longitude;
+    }
 
     public function setEmail($email) {
         $this->artisan->email = $email;

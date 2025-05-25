@@ -132,9 +132,12 @@ class AuthController extends Controller
             $builder->setEmail($request->input('email'));
             $builder->setTelephone($request->input('phone'));
             $builder->setVille($request->input('ville'));
-
+            $builder->setLocation($request->input('adresse'));
+            $builder->setLatitude($request->input('latitude'));
+            $builder->setLongitude($request->input('longitude'));
             $builder->setDomaine(); 
             $builder->setMotDePasse($request->input('motdepasse'));
+            $builder->setServices($request->input('service'));
 
             $transporteur= $builder->getProfessional();
             file_put_contents('builder_state.txt', serialize($builder));
@@ -152,7 +155,10 @@ class AuthController extends Controller
             $builder->setEmail($request->input('email'));
             $builder->setTelephone($request->input('phone'));
             $builder->setVille($request->input('ville'));
-
+            $builder->setLocation($request->input('adresse'));
+            $builder->setLatitude($request->input('latitude'));
+            $builder->setLongitude($request->input('longitude'));
+            $builder->setServices($request->input('service'));
             $builder->setDomaine(); 
             $builder->setMotDePasse($request->input('motdepasse'));
 
@@ -172,7 +178,10 @@ class AuthController extends Controller
             $builder->setEmail($request->input('email'));
             $builder->setTelephone($request->input('phone'));
             $builder->setVille($request->input('ville'));
-
+            $builder->setLocation($request->input('adresse'));
+            $builder->setLatitude($request->input('latitude'));
+            $builder->setLongitude($request->input('longitude'));
+            $builder->setServices($request->input('service'));
             $builder->setDomaine(); 
             $builder->setMotDePasse($request->input('motdepasse'));
 
@@ -341,6 +350,8 @@ class AuthController extends Controller
                 'location' => $transporteur->location,
                 'domaine' => $transporteur->domaine,
                 'services' => $transporteur->services,
+                'latitude' => $transporteur->latitude,
+                'longitude' => $transporteur->longitude,
                 'motdepasse' => $transporteur->motdepasse,
                 'carte_identite_recto' => $transporteur->carte_identite_recto,
                 'carte_identite_verso' => $transporteur->carte_identite_verso,
@@ -380,6 +391,8 @@ class AuthController extends Controller
                 'location' => $artisan->location,
                 'domaine' => $artisan->domaine,
                 'services' => $artisan->services,
+                'latitude' => $artisan->latitude,
+                'longitude' => $artisan->longitude,
                 'motdepasse' => $artisan->motdepasse,
                 'carte_identite_recto' => $artisan->carte_identite_recto,
                 'carte_identite_verso' => $artisan->carte_identite_verso,
@@ -422,19 +435,21 @@ class AuthController extends Controller
 
             $service = $builder->getProfessional();
             $professional = TestProfessionnal::create([
-                'nom' => $artisan->nom,
-                'prenom' => $artisan->prenom,
-                'telephone' => $artisan->telephone,
-                'email' => $artisan->email,
-                'ville' => $artisan->ville,
-                'location' => $artisan->location,
-                'domaine' => $artisan->domaine,
-                'services' => $artisan->services,
-                'motdepasse' => $artisan->motdepasse,
-                'carte_identite_recto' => $artisan->carte_identite_recto,
-                'carte_identite_verso' => $artisan->carte_identite_verso,
-                'image_patent' => $artisan->image_patent,
-                'is_patent' => $artisan->is_patent,
+                'nom' => $service->nom,
+                'prenom' => $service->prenom,
+                'telephone' => $service->telephone,
+                'email' => $service->email,
+                'ville' => $service->ville,
+                'location' => $service->location,
+                'domaine' => $service->domaine,
+                'services' => $service->services,
+                'latitude' => $service->latitude,
+                'longitude' => $service->longitude,
+                'motdepasse' => $service->motdepasse,
+                'carte_identite_recto' => $service->carte_identite_recto,
+                'carte_identite_verso' => $service->carte_identite_verso,
+                'image_patent' => $service->image_patent,
+                'is_patent' => $service->is_patent,
             ]);
     
             

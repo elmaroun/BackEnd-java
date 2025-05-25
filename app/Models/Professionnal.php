@@ -53,5 +53,13 @@ abstract class Professionnal extends Model
     {
         return $this->hasOne(Transporteur::class);
     }
+    public function demandes()
+    {
+        return $this->hasMany(Demande::class, 'professionnal_id');
+    }
+    public function avis()
+    {
+        return $this->hasManyThrough(Avis::class, Demande::class, 'professionnal_id', 'demandes_id');
+    }
 
 }
