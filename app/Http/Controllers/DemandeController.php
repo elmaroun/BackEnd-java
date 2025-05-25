@@ -142,31 +142,31 @@ class DemandeController extends Controller
         $demande = Demande::findOrFail($demandeId);
         
         // Get professionals within 10km radius (adjust as needed)
-    $professionals = TestProfessionnal::select('professionnals.*')
-        ->selectRaw('
-            (6371 * acos(
-                cos(radians(?)) * cos(radians(latitude)) * 
-                cos(radians(longitude) - radians(?)) + 
-                sin(radians(?)) * sin(radians(latitude))
-            )) AS distance', [
-                $demande->latitude,
-                $demande->longitude,
-                $demande->latitude
-            ])
-        ->selectRaw("
-            CONCAT_WS(', ',
-                TRIM(SUBSTRING_INDEX(location, ',', 1)),
-                TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(location, ',', 2), ',', -1)),
-                TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(location, ',', 3), ',', -1))
-            ) AS formatted_address
-        ")
-        ->withAvg('avis', 'rating')
-        ->withCount(['demandes as requests_count' => function($query) {
-            $query->where('statut', 'Done');
-        }]) // assuming 'note' is the rating column
-        ->having('distance', '<', 10)
-        ->orderBy('distance')
-        ->get();
+        $professionals = TestProfessionnal::select('professionnals.*')
+            ->selectRaw('
+                (6371 * acos(
+                    cos(radians(?)) * cos(radians(latitude)) * 
+                    cos(radians(longitude) - radians(?)) + 
+                    sin(radians(?)) * sin(radians(latitude))
+                )) AS distance', [
+                    $demande->latitude,
+                    $demande->longitude,
+                    $demande->latitude
+                ])
+            ->selectRaw("
+                CONCAT_WS(', ',
+                    TRIM(SUBSTRING_INDEX(location, ',', 1)),
+                    TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(location, ',', 2), ',', -1)),
+                    TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(location, ',', 3), ',', -1))
+                ) AS formatted_address
+            ")
+            ->withAvg('avis', 'rating')
+            ->withCount(['demandes as requests_count' => function($query) {
+                $query->where('statut', 'Done');
+            }]) // assuming 'note' is the rating column
+            ->having('distance', '<', 10)
+            ->orderBy('distance')
+            ->get();
 
 
 
@@ -175,6 +175,29 @@ class DemandeController extends Controller
             'success' => true,
             'professionals' => $professionals,
             'demande' => $demande
+        ]);
+    }
+    public function getDemandeClient()
+    {
+        // Get the demande
+        $demandeEnCours = Demande::join('clients', 'clients.id', '=', 'demandes.client_id')
+            ->where('demandes.client_id', '=', 2)
+            ->where('demandes.statut','=','En cours')
+            ->join('professionnals', 'professionnals.id', '=', 'demandes.professionnal_id')
+            ->select('demandes.*','professionnals.*')
+            ->get();
+
+        $HistorqueDemande = Demande::join('clients', 'clients.id', '=', 'demandes.client_id')
+            ->where('demandes.client_id', '=', 2)
+            ->join('professionnals', 'professionnals.id', '=', 'demandes.professionnal_id')
+            ->select('demandes.*','professionnals.*')
+            ->get();
+        
+
+        return response()->json([
+            'success' => true,
+            'demandeEnCours' => $demandeEnCours,
+            'HistorqueDemande' => $HistorqueDemande,
         ]);
     }
 

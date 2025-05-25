@@ -32,3 +32,4 @@ Route::post('/service-request', [DemandeController::class, 'AddDemande'])->name(
 Route::get('/professionals/nearby/{demandeId}', [DemandeController::class, 'getNearby']);
 Route::post('/addDemandeProf', [DemandeController::class, 'AddDemandeProf'])->name('Demande.Add.Prof');
 Route::get('/profileProf/{profId}', [ProfController::class, 'getProfileProf'])->name('prof.prof');
+Route::get('/DemandeForClient', [DemandeController::class, 'getDemandeClient']);
