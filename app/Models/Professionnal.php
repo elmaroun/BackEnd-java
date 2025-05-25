@@ -15,6 +15,8 @@ abstract class Professionnal extends Model
         'img',
         'nom',
         'prenom',
+        'latitude',
+        'longitude',
         'telephone',
         'email',
         'ville',

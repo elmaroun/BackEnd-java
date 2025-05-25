@@ -3,6 +3,7 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfController;
 use App\Http\Controllers\AvisProfController;
+use App\Http\Controllers\DemandeController;
 
 
 
@@ -27,3 +28,5 @@ Route::put('/demandes/{id}/refuse', [ProfController::class, 'refuse']);
 Route::get('/Profile', [ProfController::class, 'GetProfile'])->name('Profile');
 Route::post('/update-profile', [ProfController::class, 'UpdateProfile'])->name('Update-Profile');
 Route::get('professionals/avis', [AvisProfController::class, 'GetAvisProfessionnal'])->name('professionals.avis');
+Route::post('/service-request', [DemandeController::class, 'AddDemande'])->name('Demande.Add');
+Route::get('/professionals/nearby/{demandeId}', [DemandeController::class, 'getNearby']);
