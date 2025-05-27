@@ -179,6 +179,10 @@ class DemandeController extends Controller
             ->having('distance', '<', 10)
             ->orderBy('distance')
             ->get();
+        $professionals->map(function ($item) {
+            $item->img_url = $item->img ? Storage::url($item->img) : null;
+            return $item;
+        });
 
 
 
@@ -201,13 +205,21 @@ class DemandeController extends Controller
             ->join('professionnals', 'professionnals.id', '=', 'demandes.professionnal_id')
             ->select('demandes.*','professionnals.nom','professionnals.prenom','professionnals.telephone','professionnals.email','professionnals.services','professionnals.img')
             ->get();
-
+        $demandeEnCours->map(function ($item) {
+            $item->img_url = $item->img ? Storage::url($item->img) : null;
+            return $item;
+        });
         $HistorqueDemande = Demande::join('clients', 'clients.id', '=', 'demandes.client_id')
             ->where('demandes.client_id', '=', $clientId)
             ->whereNotIn('statut', ['en attente', 'en cours'])
             ->join('professionnals', 'professionnals.id', '=', 'demandes.professionnal_id')
             ->select('demandes.*','professionnals.*')
             ->get();
+
+        $HistorqueDemande->map(function ($item) {
+            $item->img_url = $item->img ? Storage::url($item->img) : null;
+            return $item;
+        });
         
 
         return response()->json([
@@ -220,7 +232,6 @@ class DemandeController extends Controller
      public function cancelDemande($id)
     {
     
-
         // Check if this professional already has this demande
         $existingDemande = Demande::where([
             'id' => $id

@@ -145,7 +145,7 @@ class AuthController extends Controller
             $builder->setMotDePasse($request->input('motdepasse'));
             $builder->setServices($request->input('service'));
             if ($request->hasFile('imgProf')) {
-                $path = $request->file('imgProf')->store('im');
+                $path = $request->file('imgProf')->store('ProfileProf','public');
                 $builder->setImageProf($path);
             }
 
@@ -172,7 +172,7 @@ class AuthController extends Controller
             $builder->setDomaine(); 
             $builder->setMotDePasse($request->input('motdepasse'));
             if ($request->hasFile('imgProf')) {
-                $path = $request->file('imgProf')->store('im');
+                $path = $request->file('imgProf')->store('ProfileProf','public');
                 $builder->setImageProf($path);
             }
 
@@ -199,7 +199,7 @@ class AuthController extends Controller
             $builder->setDomaine(); 
             $builder->setMotDePasse($request->input('motdepasse'));
             if ($request->hasFile('imgProf')) {
-                $path = $request->file('imgProf')->store('imgProf');
+                $path = $request->file('imgProf')->store('ProfileProf','public');
                 $builder->setImageProf($path);
             }
 
@@ -242,16 +242,16 @@ class AuthController extends Controller
         if ($domaine == "transports" ) {
             $builder->setIsPatent($request->input('is_patent'));
             if ($request->hasFile('carte_identite_recto')) {
-                $path = $request->file('carte_identite_recto')->store('carte_identite_recto');
+                $path = $request->file('carte_identite_recto')->store('carte_identite_recto','public');
                 $builder->setCarteIdentiteRecto($path);
             }
             if ($request->hasFile('img_patent')) {
-                $path = $request->file('img_patent')->store('img_patent');
+                $path = $request->file('img_patent')->store('img_patent','public');
                 $builder->setImagePatent($path);
             }
             
             if ($request->hasFile('carte_identite_verso')) {
-                $path = $request->file('carte_identite_verso')->store('carte_identite_verso');
+                $path = $request->file('carte_identite_verso')->store('carte_identite_verso','public');
                 $builder->setCarteIdentiteVerso($path);
             }
 
@@ -268,16 +268,16 @@ class AuthController extends Controller
 
             $builder->setIsPatent($request->input('is_patent'));
             if ($request->hasFile('carte_identite_recto')) {
-                $path = $request->file('carte_identite_recto')->store('carte_identite_recto');
+                $path = $request->file('carte_identite_recto')->store('carte_identite_recto','public');
                 $builder->setCarteIdentiteRecto($path);
             }
             if ($request->hasFile('img_patent')) {
-                $path = $request->file('img_patent')->store('img_patent');
+                $path = $request->file('img_patent')->store('img_patent','public');
                 $builder->setImagePatent($path);
             }
             
             if ($request->hasFile('carte_identite_verso')) {
-                $path = $request->file('carte_identite_verso')->store('carte_identite_verso');
+                $path = $request->file('carte_identite_verso')->store('carte_identite_verso','public');
                 $builder->setCarteIdentiteVerso($path);
             }
 
@@ -293,15 +293,15 @@ class AuthController extends Controller
         }elseif($professional1->domaine == 'services'){
             $builder->setIsPatent($request->input('is_patent'));
             if ($request->hasFile('carte_identite_recto')) {
-                $path = $request->file('carte_identite_recto')->store('carte_identite_recto');
+                $path = $request->file('carte_identite_recto')->store('carte_identite_recto','public');
                 $builder->setCarteIdentiteRecto($path);
             }
             if ($request->hasFile('img_patent')) {
-                $path = $request->file('img_patent')->store('img_patent');
+                $path = $request->file('img_patent')->store('img_patent','public');
                 $builder->setImagePatent($path);
             }
             if ($request->hasFile('carte_identite_verso')) {
-                $path = $request->file('carte_identite_verso')->store('carte_identite_verso');
+                $path = $request->file('carte_identite_verso')->store('carte_identite_verso','public');
                 $builder->setCarteIdentiteVerso($path);
             }
 
@@ -354,7 +354,7 @@ class AuthController extends Controller
             $builder->setTypeVehicule($request->input('type_vehicule'));
 
             if ($request->hasFile('image_vehicule')) {
-                $path = $request->file('image_vehicule')->store('image_vehicule');
+                $path = $request->file('image_vehicule')->store('image_vehicule','public');
                 $builder->setImageVehicule($path);
             }
             file_put_contents('builder_state.txt', serialize($builder));

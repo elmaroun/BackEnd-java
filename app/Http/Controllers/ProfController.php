@@ -45,6 +45,9 @@ class ProfController extends Controller
 
             $user = json_decode($json, true);
             $userId = $user['id'];
+            $user = TestProfessionnal::findOrFail($userId);
+            $user->img_url = $user->img ? Storage::url($user->img) : null;
+
             $Demandes_recues = Demande::with('client')
                 ->where('professionnal_id', $userId)
                 ->where('statut','En Attente')
@@ -118,6 +121,10 @@ class ProfController extends Controller
             $query = $filterService->apply($query);
 
             $demandes = $query->get();
+            $demandes->map(function ($item) {
+                $item->client->img_url = $item->client->img ? Storage::url($item->client->img) : null;
+                return $item;
+            });
 
             return response()->json([
                 'Demandes_recues' => $demandes
@@ -129,6 +136,7 @@ class ProfController extends Controller
         public function show($id)
         {
             $demande = Demande::findOrFail($id);
+            $demande->client->img_url = $demande->client->img ? Storage::url($demande->client->img) : null;
 
             // Calculate rating stats
            
@@ -146,6 +154,8 @@ class ProfController extends Controller
             $user = json_decode($json, true);
             $userId = $user['id'];
             $user = TestProfessionnal::findOrFail($userId);
+            $user->img_url = $user->img ? Storage::url($user->img) : null;
+
             $travaux = DB::table('professionnals')
                 ->join('travaux', 'professionnals.id', '=', 'travaux.professionnal_id')
                 ->where('professionnals.id', $userId)
@@ -160,7 +170,7 @@ class ProfController extends Controller
         public function accept($id)
         {
             $demande = Demande::findOrFail($id);
-            $demande->update(['statut' => 'acceptée']);
+            $demande->update(['statut' => 'En cours']);
             
             return response()->json(['message' => 'Demande acceptée']);
         }
@@ -168,7 +178,7 @@ class ProfController extends Controller
         public function refuse($id)
         {
             $demande = Demande::findOrFail($id);
-            $demande->update(['status' => 'Refusée']);
+            $demande->update(['status' => 'Refusé']);
             
             return response()->json(['message' => 'Demande refusée']);
         }
@@ -229,6 +239,7 @@ public function getProfileProf($profId)
             $query->where('statut', 'Done');
         }])
         ->firstOrFail();
+        $user->img_url = $user->img ? Storage::url($user->img) : null;
 
     return response()->json([
         'success' => true,
