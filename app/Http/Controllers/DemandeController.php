@@ -53,17 +53,20 @@ class DemandeController extends Controller
             'demande_domaine' => 'required',
 
         ]);
-        $json = Storage::get('user_logins.json');
-        $user = json_decode($json, true);
-        $userId = $user['id'];
+        $json = Storage::get('Client_login.json');
+        $client = json_decode($json, true);
+        $clientId = $client['id'];
 
         $demande = Demande::create([
-            'client_id' => 2,
+            'client_id' => $clientId,
             'date' => $request->desired_date,
             'location' => $request->address,
             'latitude' =>$request->latitude,
             'longitude' =>$request->longitude,
-            'statut' => 'En cours',
+            'statut' => 'En attente',
+            'Title' => $request->demande_type,
+            'Service' => $request->demande_domaine,
+
 
         ]);
     
@@ -84,6 +87,14 @@ class DemandeController extends Controller
         $existingDemande = Demande::where([
             'id' => $request->demande_id
         ])->first();
+
+        if (!$existingDemande) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Demande not found',
+            ], 404);
+        }
+
 
         if ($existingDemande->professionnal_id ==null) {
             // Update existing demande
@@ -160,6 +171,7 @@ class DemandeController extends Controller
                     TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(location, ',', 3), ',', -1))
                 ) AS formatted_address
             ")
+            ->where('services',$demande->Service)
             ->withAvg('avis', 'rating')
             ->withCount(['demandes as requests_count' => function($query) {
                 $query->where('statut', 'Done');
@@ -179,16 +191,20 @@ class DemandeController extends Controller
     }
     public function getDemandeClient()
     {
-        // Get the demande
+        $json = Storage::get('Client_login.json');
+        $client = json_decode($json, true);
+        $clientId = $client['id'];
+
         $demandeEnCours = Demande::join('clients', 'clients.id', '=', 'demandes.client_id')
-            ->where('demandes.client_id', '=', 2)
-            ->where('demandes.statut','=','En cours')
+            ->where('demandes.client_id', '=', $clientId)
+            ->whereIn('statut', ['En attente', 'En cours'])
             ->join('professionnals', 'professionnals.id', '=', 'demandes.professionnal_id')
-            ->select('demandes.*','professionnals.*')
+            ->select('demandes.*','professionnals.nom','professionnals.prenom','professionnals.telephone','professionnals.email','professionnals.services','professionnals.img')
             ->get();
 
         $HistorqueDemande = Demande::join('clients', 'clients.id', '=', 'demandes.client_id')
-            ->where('demandes.client_id', '=', 2)
+            ->where('demandes.client_id', '=', $clientId)
+            ->whereNotIn('statut', ['en attente', 'en cours'])
             ->join('professionnals', 'professionnals.id', '=', 'demandes.professionnal_id')
             ->select('demandes.*','professionnals.*')
             ->get();
@@ -201,13 +217,32 @@ class DemandeController extends Controller
         ]);
     }
 
-
-
-
-
-
-
+     public function cancelDemande($id)
+    {
     
 
-    
+        // Check if this professional already has this demande
+        $existingDemande = Demande::where([
+            'id' => $id
+        ])->first();
+
+        if (!$existingDemande) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Demande not found',
+            ], 404);
+        }
+
+        $existingDemande->update([
+            'statut' => 'Annulé',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Existing demande updated successfully',
+        ]);
+
+    }
+
+   
 }

@@ -16,6 +16,7 @@ interface ProfessionalBuilder {
     public function setCarteIdentiteVerso($carte_identite_verso);
     public function setIsPatent($is_patent);
     public function setImagePatent($image_patent);
+    public function setImageProf($image_patent);
 
     public function getProfessional(): Professionnal;
 }

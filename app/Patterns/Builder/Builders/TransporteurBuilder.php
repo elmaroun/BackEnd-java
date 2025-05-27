@@ -72,7 +72,9 @@ class TransporteurBuilder implements ProfessionalBuilder {
     public function setImageVehicule($imagevehicule) {
         $this->transporteur->image_vehicule = $imagevehicule;
     }
-
+    public function setImageProf($imageprofile) {
+        $this->transporteur->img = $imageprofile;
+    }
     public function setChargeMax($ChargeMax) {
         $this->transporteur->charge_max = $ChargeMax;
     } 

@@ -10,11 +10,13 @@ class Demande extends Model
         'client_id',
         'latitude',
         'longitude',
-        'professional_id',
+        'professionnal_id',
         'location',
         'description',
         'date',
         'statut',
+        'Title',
+        'Service',
     ];
 
     public function client()

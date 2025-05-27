@@ -25,6 +25,9 @@ class ArtisanBuilder implements ProfessionalBuilder {
     public function setLongitude($longitude) {
         $this->artisan->longitude = $longitude;
     }
+    public function setImageProf($imageprofile) {
+        $this->artisan->img = $imageprofile;
+    }
 
     public function setEmail($email) {
         $this->artisan->email = $email;

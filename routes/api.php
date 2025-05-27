@@ -33,3 +33,4 @@ Route::get('/professionals/nearby/{demandeId}', [DemandeController::class, 'getN
 Route::post('/addDemandeProf', [DemandeController::class, 'AddDemandeProf'])->name('Demande.Add.Prof');
 Route::get('/profileProf/{profId}', [ProfController::class, 'getProfileProf'])->name('prof.prof');
 Route::get('/DemandeForClient', [DemandeController::class, 'getDemandeClient']);
+Route::get('/annuler-demande/{id}', [DemandeController::class, 'cancelDemande']);

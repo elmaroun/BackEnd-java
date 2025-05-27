@@ -82,6 +82,10 @@ class AuthController extends Controller
 
         if ($client && password_verify($credentials['password'], $client->motdepasse)) {
             Auth::login($client);
+            $clientData = [
+            'id' => Auth::id()];
+            Storage::put('Client_login.json', json_encode($clientData, JSON_PRETTY_PRINT));
+
             return response()->json([
                 'success' => true,
                 'message' => 'Successfully authenticated',
@@ -117,7 +121,9 @@ class AuthController extends Controller
             'ville' => 'required|string|max:255',
             'adresse' => 'required|string|max:255',
             'domaine' => 'required|string|max:255',
-            'motdepasse' => 'required|string|min:8',            
+            'motdepasse' => 'required|string|min:8',   
+            'imgProf' => 'required|file|mimes:jpg,jpeg,png,pdf',            
+         
           
         ]);
         
@@ -138,6 +144,10 @@ class AuthController extends Controller
             $builder->setDomaine(); 
             $builder->setMotDePasse($request->input('motdepasse'));
             $builder->setServices($request->input('service'));
+            if ($request->hasFile('imgProf')) {
+                $path = $request->file('imgProf')->store('im');
+                $builder->setImageProf($path);
+            }
 
             $transporteur= $builder->getProfessional();
             file_put_contents('builder_state.txt', serialize($builder));
@@ -161,6 +171,10 @@ class AuthController extends Controller
             $builder->setServices($request->input('service'));
             $builder->setDomaine(); 
             $builder->setMotDePasse($request->input('motdepasse'));
+            if ($request->hasFile('imgProf')) {
+                $path = $request->file('imgProf')->store('im');
+                $builder->setImageProf($path);
+            }
 
             $artisan= $builder->getProfessional();
             file_put_contents('builder_state.txt', serialize($builder));
@@ -184,6 +198,10 @@ class AuthController extends Controller
             $builder->setServices($request->input('service'));
             $builder->setDomaine(); 
             $builder->setMotDePasse($request->input('motdepasse'));
+            if ($request->hasFile('imgProf')) {
+                $path = $request->file('imgProf')->store('imgProf');
+                $builder->setImageProf($path);
+            }
 
             $service= $builder->getProfessional();
             file_put_contents('builder_state.txt', serialize($builder));
@@ -344,6 +362,7 @@ class AuthController extends Controller
             $professional = TestProfessionnal::create([
                 'nom' => $transporteur->nom,
                 'prenom' => $transporteur->prenom,
+                'img' => $transporteur->img,
                 'telephone' => $transporteur->telephone,
                 'email' => $transporteur->email,
                 'ville' => $transporteur->ville,
@@ -385,6 +404,7 @@ class AuthController extends Controller
             $professional = TestProfessionnal::create([
                 'nom' => $artisan->nom,
                 'prenom' => $artisan->prenom,
+                'img' => $artisan->img,
                 'telephone' => $artisan->telephone,
                 'email' => $artisan->email,
                 'ville' => $artisan->ville,
@@ -440,6 +460,7 @@ class AuthController extends Controller
                 'telephone' => $service->telephone,
                 'email' => $service->email,
                 'ville' => $service->ville,
+                'img' => $service->img,
                 'location' => $service->location,
                 'domaine' => $service->domaine,
                 'services' => $service->services,
@@ -469,7 +490,7 @@ class AuthController extends Controller
 
     public function registerClient(Request $request)
     {
-
+        $path = $request->file('imgProf')->store('imageClient');
 
         $professional = client::create([
             'nom' => $request->nom,
@@ -478,7 +499,9 @@ class AuthController extends Controller
             'ville' => $request->ville,
             'adresse' => $request->adresse,
             'email' => $request->email,
-            'motdepasse' => Hash::make($request->motdepasse)
+            'motdepasse' => Hash::make($request->motdepasse),
+            'img' => $path,
+
         ]);
         
        

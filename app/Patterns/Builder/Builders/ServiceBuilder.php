@@ -30,6 +30,9 @@ class ServiceBuilder implements ProfessionalBuilder {
     public function setLongitude($longitude) {
         $this->service->longitude = $longitude;
     }
+    public function setImageProf($imageprofile) {
+        $this->service->img = $imageprofile;
+    }
     public function setTelephone($telephone) {
         $this->service->telephone = $telephone;
     }
