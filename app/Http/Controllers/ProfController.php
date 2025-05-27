@@ -33,6 +33,9 @@ use App\Patterns\Strategy\StatutFiltersStrategies\RejectedFilter;
 use App\Repositories\AvisRepositoryInterface;
 use App\Repositories\EloquentAvisRepository;
 
+use App\Observers\EmailObserver;
+use App\Notifications\StatusChangedNotification;
+
 
 
 class ProfController extends Controller
@@ -170,7 +173,8 @@ class ProfController extends Controller
         public function accept($id)
         {
             $demande = Demande::findOrFail($id);
-            $demande->update(['statut' => 'En cours']);
+            $demande->attachObserver(new EmailObserver($demande));
+            $demande->updateStatus('En cours');
             
             return response()->json(['message' => 'Demande acceptée']);
         }
@@ -178,7 +182,8 @@ class ProfController extends Controller
         public function refuse($id)
         {
             $demande = Demande::findOrFail($id);
-            $demande->update(['status' => 'Refusé']);
+            $demande->attachObserver(new EmailObserver($demande));
+            $demande->updateStatus('Refusé');
             
             return response()->json(['message' => 'Demande refusée']);
         }
