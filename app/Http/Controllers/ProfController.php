@@ -10,6 +10,7 @@ use App\Models\TestProfessionnal;
 use App\Models\client;
 use App\Models\Service;
 use App\Models\Demande;
+use App\Models\Avis;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -78,6 +79,23 @@ class ProfController extends Controller
 
         ]);
         }
+
+        public function storeAvis(Request $request)
+            {
+                $request->validate([
+                    'demande_id' => 'required|exists:demandes,id',
+                    'rating' => 'required|integer|min:1|max:5',
+                    'comment' => 'nullable|string',
+                ]);
+
+                Avis::create([
+                    'demandes_id' => $request->demande_id,
+                    'rating' => $request->rating,
+                    'Commentaire' => $request->comment,
+                ]);
+
+                return response()->json(['success' => true, 'message' => 'Évaluation enregistrée.']);
+            }
 
         public function AvisRecus(Request $request)
         {
@@ -175,6 +193,15 @@ class ProfController extends Controller
             $demande = Demande::findOrFail($id);
             $demande->attachObserver(new EmailObserver($demande));
             $demande->updateStatus('En cours');
+            
+            return response()->json(['message' => 'Demande acceptée']);
+        }
+
+        public function done($id)
+        {
+            $demande = Demande::findOrFail($id);
+            $demande->attachObserver(new EmailObserver($demande));
+            $demande->updateStatus('Done');
             
             return response()->json(['message' => 'Demande acceptée']);
         }

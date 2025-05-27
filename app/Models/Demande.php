@@ -53,9 +53,13 @@ class Demande extends Model
         $oldStatus = $this->statut;
         $this->statut = $newStatus;
         $this->save();
+        if($newStatus=='Done'){
+             $this->observer->notifyDoneService($newStatus);
 
-        if ($this->observer) {
-            $this->observer->notifyStatusChange($newStatus);
+        }else{
+            if ($this->observer) {
+                $this->observer->notifyStatusChange($newStatus);
+            }
         }
     }
 }

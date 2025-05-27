@@ -24,6 +24,7 @@ Route::get('/AvisRecus', [ProfController::class, 'AvisRecus'])->name('Prof.AvisR
 Route::get('/demandes/{id}', [ProfController::class, 'show']);
 Route::put('/demandes/{id}/accept', [ProfController::class, 'accept']);
 Route::put('/demandes/{id}/refuse', [ProfController::class, 'refuse']);
+Route::put('/demandes/{id}/Done', [ProfController::class, 'done']);
 
 Route::get('/Profile', [ProfController::class, 'GetProfile'])->name('Profile');
 Route::post('/update-profile', [ProfController::class, 'UpdateProfile'])->name('Update-Profile');
@@ -34,3 +35,6 @@ Route::post('/addDemandeProf', [DemandeController::class, 'AddDemandeProf'])->na
 Route::get('/profileProf/{profId}', [ProfController::class, 'getProfileProf'])->name('prof.prof');
 Route::get('/DemandeForClient', [DemandeController::class, 'getDemandeClient']);
 Route::get('/annuler-demande/{id}', [DemandeController::class, 'cancelDemande']);
+
+
+Route::post('/addavis', [ProfController::class, 'storeAvis']);

@@ -35,6 +35,11 @@ use App\Patterns\Strategy\StatutFiltersStrategies\RejectedFilter;
 use App\Repositories\AvisRepositoryInterface;
 use App\Repositories\EloquentAvisRepository;
 
+use App\Patterns\Command\CreateServiceRequestCommand;
+use App\Patterns\Command\RequestHandler;
+use App\Patterns\Command\ServiceRequestCommand;
+
+
 
 
 class DemandeController extends Controller
@@ -94,36 +99,17 @@ class DemandeController extends Controller
                 'message' => 'Demande not found',
             ], 404);
         }
-
-
-        if ($existingDemande->professionnal_id ==null) {
-            // Update existing demande
-            $existingDemande->update([
-                'professionnal_id' => $request->professional_id,
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'action' => 'updated',
-                'idDemande' => $existingDemande->id,
-                'message' => 'Existing demande updated successfully',
-            ]);
-        }
-
-        $newDemandeData = $existingDemande->toArray();
-        $newDemandeData['professionnal_id'] = $request->professional_id;
-
-        // Optionally unset fields you don't want to copy (like id, timestamps)
-        unset($newDemandeData['id'], $newDemandeData['created_at'], $newDemandeData['updated_at']);
-
-        $demande = Demande::create($newDemandeData);
+        $command = new CreateServiceRequestCommand($existingDemande, $request->professional_id);
+        $handler = new RequestHandler();
+        $handler->handle($command);
 
         return response()->json([
             'success' => true,
-            'action' => 'created',
-            'idDemande' => $demande->id,
-            'message' => 'New demande created successfully',
+            'message' => 'done',
         ]);
+        
+
+
     }
 
     public function AddDemandeToDB(Request $request)

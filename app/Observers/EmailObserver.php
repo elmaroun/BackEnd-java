@@ -26,4 +26,15 @@ class EmailObserver implements DemandeObserver
             new StatusChangedNotification($this->demande, $newStatus, 'professional')
         );
     }
+
+    public function notifyDoneService(string $newStatus)
+    {
+        // Notify client
+        $this->demande->client->notify(
+            new StatusChangedNotification($this->demande, $newStatus, 'done')
+        );
+
+
+       
+    }
 }
