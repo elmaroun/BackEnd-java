@@ -32,7 +32,7 @@ use App\Patterns\Strategy\SortStrategies\NameSort;
 use App\Patterns\Strategy\StatutFiltersStrategies\AcceptedFilter;
 use App\Patterns\Strategy\StatutFiltersStrategies\PendingFilter;
 use App\Patterns\Strategy\StatutFiltersStrategies\RejectedFilter;
-use App\Repositories\AvisRepositoryInterface;
+use App\Repositories\RepositoryInterface;
 use App\Repositories\EloquentAvisRepository;
 
 use App\Patterns\Command\CreateServiceRequestCommand;

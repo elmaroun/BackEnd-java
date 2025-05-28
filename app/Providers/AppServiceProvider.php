@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\EloquentAvisRepository;
-use App\Repositories\AvisRepositoryInterface;
+use App\Repositories\RepositoryInterface;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -15,7 +15,7 @@ class AppServiceProvider extends ServiceProvider
     public function register()
         {
             $this->app->bind(
-                AvisRepositoryInterface::class,
+                RepositoryInterface::class,
                 EloquentAvisRepository::class
             );
         }

@@ -35,10 +35,7 @@ class Demande extends Model
         return $this->belongsTo(TestProfessionnal::class, 'professionnal_id');
     }
 
-    public function review()
-    {
-        return $this->hasOne(Review::class);
-    }
+
 
     //////////////////////////
     protected $observer;

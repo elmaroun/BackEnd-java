@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Avis;
 
-interface AvisRepositoryInterface
+interface RepositoryInterface
 {
     public function all();
     public function find($id);

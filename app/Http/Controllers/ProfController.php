@@ -31,7 +31,7 @@ use App\Patterns\Strategy\SortStrategies\NameSort;
 use App\Patterns\Strategy\StatutFiltersStrategies\AcceptedFilter;
 use App\Patterns\Strategy\StatutFiltersStrategies\PendingFilter;
 use App\Patterns\Strategy\StatutFiltersStrategies\RejectedFilter;
-use App\Repositories\AvisRepositoryInterface;
+use App\Repositories\RepositoryInterface;
 use App\Repositories\EloquentAvisRepository;
 
 use App\Observers\EmailObserver;
@@ -59,6 +59,9 @@ class ProfController extends Controller
                 ->get();
 
             $Demandes_count = Demande::where('professionnal_id', $userId)->count();
+            $rating = Avis::join('demandes', 'demandes.id', '=', 'avis.demandes_id')
+                ->where('demandes.professionnal_id', $userId)
+                ->avg('avis.rating');
             $Demandes_accepte_count = Demande::where('professionnal_id', $userId)
                 ->where('statut','acceptée')
                 ->count();
@@ -74,6 +77,7 @@ class ProfController extends Controller
             'user' =>$user,
             'Demandes_recues' => $Demandes_recues,
             'Demandes_count' => $Demandes_count,
+            'rating'=>$rating,
             'Demandes_accepte_count' => $Demandes_accepte_count,
             'Demandes_future_count' => $Demandes_future_count
 

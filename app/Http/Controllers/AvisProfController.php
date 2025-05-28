@@ -32,7 +32,7 @@ use App\Patterns\Strategy\SortStrategies\NameSort;
 use App\Patterns\Strategy\StatutFiltersStrategies\AcceptedFilter;
 use App\Patterns\Strategy\StatutFiltersStrategies\PendingFilter;
 use App\Patterns\Strategy\StatutFiltersStrategies\RejectedFilter;
-use App\Repositories\AvisRepositoryInterface;
+use App\Repositories\RepositoryInterface;
 use App\Repositories\EloquentAvisRepository;
 
 
@@ -40,7 +40,7 @@ use App\Repositories\EloquentAvisRepository;
 class AvisProfController extends Controller
 {
     protected $avisRepository;
-    public function __construct(AvisRepositoryInterface $avisRepository)
+    public function __construct(RepositoryInterface $avisRepository)
     {
         $this->avisRepository = $avisRepository;
     }

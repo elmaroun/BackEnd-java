@@ -2,10 +2,10 @@
 
 namespace App\Repositories;
 
-use App\Repositories\AvisRepositoryInterface;
+use App\Repositories\RepositoryInterface;
 use App\Models\Avis;
 
-class EloquentAvisRepository implements AvisRepositoryInterface
+class EloquentAvisRepository implements RepositoryInterface
 {
     protected $model;
 

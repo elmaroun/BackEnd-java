@@ -14,10 +14,10 @@ class StatusChangedNotification extends Notification
         public string $recipientType,
 
     ) {}
-    public function via($notifiable)
-    {
-        return ['mail'];
-    }
+public function via($notifiable)
+{
+    return ['mail'];
+}
 
 public function toMail($notifiable): MailMessage
 {
